@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useState } from "react";
 
 const initialItems = [
@@ -21,9 +20,9 @@ export default function App() {
   return (
     <div className="app">
       <Logo />
-      <Form onAddItems={handleAddItems} />
-      <PackingList items={items} onRemoveItem={handleRemoveItem} onToggleItem={handleToggleItem} />
-      <Stats />
+      <Form onAddItems={handleAddItems} items={items} />
+      <PackingList items={items} setItems={setItems} onRemoveItem={handleRemoveItem} onToggleItem={handleToggleItem} />
+      <Stats items={items} />
     </div>
   );
 }
@@ -34,7 +33,7 @@ function Logo() {
     )
 }
 
-function Form({onAddItems}) {
+function Form({onAddItems, items}) {
 
     const [description, setDescription] = useState("")
     const [quantity, setQuantity] = useState(1)
@@ -45,7 +44,7 @@ function Form({onAddItems}) {
             return
         }
         const newItemObject = {
-            id: initialItems[initialItems.length - 1].id + 1,
+            id: items.length === 0 ? 0 : items[items.length - 1].id + 1,
             description: description,
             quantity: quantity,
             packed: false
@@ -74,17 +73,49 @@ function Form({onAddItems}) {
     )
 }
 
-function PackingList({items, onRemoveItem, onToggleItem}) {
+function PackingList({ items, setItems, onRemoveItem, onToggleItem }) {
+    const [sortOption, setSortOption] = useState('packed')
+    function handleSortOption(event) {
+        setSortOption(event.target.value)
+    }
+    function handleClear() {
+        if (window.confirm("You really want to remove all items?"))
+            setItems([])
+    }
+    let sortedItems = []
+    switch (sortOption) {
+        case "input":
+            sortedItems = [...items.sort((a ,b) => Number(a.id) - Number(b.id))]
+            break;
+        case "description":
+            sortedItems = [...items.sort((a ,b) => a.description.localeCompare(b.description))]
+            break;
+        case "packed":
+            sortedItems = [...items.sort((a ,b) => Number(a.packed) - Number(b.packed))]
+            break;
+        default:
+            sortedItems = [...items]
+    }
     return (
         <div className="list">
             <ul>
-              {items.map(item => <Item
+              {sortedItems.map(item => <Item
                 item={item}
                 key={item.id}
                 onRemoveItem={onRemoveItem}
                 onToggleItem={onToggleItem}
               />)}
             </ul>
+            { items.length > 0 ?
+                <div className="actions">
+                    <select onChange={handleSortOption} value={sortOption}>
+                        <option value='input'>Sort by input order</option>
+                        <option value='description'>Sort by description</option>
+                        <option value='packed'>Sort by packed status</option>
+                    </select>
+                    <button onClick={handleClear}>Clear list</button> 
+                </div>
+            : ""}
         </div>
     )
 }
@@ -99,11 +130,27 @@ function Item({ item, onRemoveItem, onToggleItem }) {
     </li>
 }
 
-function Stats() {
+function Stats({ items }) {
+    if (!items.length) {
+        return (
+            <footer className="stats">
+                <em>
+                    Start adding some items to your packing list 🚀
+                </em>
+            </footer>            
+        )
+    }
+    const itemsAmount = items.length
+    const packedItemsAmount = items.filter((item)=>item.packed).length
+    const percent = Math.round((packedItemsAmount/itemsAmount) * 100)
     return (
-      <footer className="stats">
+        <footer className="stats">
         <em>
-          👜 You have X items in your list, and you already packed X (X%)
+            {
+                (percent === 100) ? 'You got everything! Ready to go ✈️' : 
+                `👜 You have ${itemsAmount} items in your list,
+                and you already packed ${packedItemsAmount} (${percent}%)`
+            }
         </em>
       </footer>
     )
