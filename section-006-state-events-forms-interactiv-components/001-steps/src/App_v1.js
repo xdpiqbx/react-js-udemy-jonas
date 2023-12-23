@@ -7,14 +7,6 @@ const messages = [
 ];
 
 function App() {
-    return (
-        <div>
-            <Steps />
-        </div>
-    )
-}
-
-function Steps() {
     const [step, setStep] = useState(1)
     const [isOpen, setIsOpen] = useState(true)
 
@@ -30,6 +22,10 @@ function Steps() {
         setIsOpen(prev => !prev)
     }
 
+    const buttonStyle = {
+        backgroundColor: '#7950f2',
+        color: '#fff'
+    }
     return (
         <>
         <button className="close" onClick={handlerIsOpen}>&times;</button>
@@ -40,34 +36,25 @@ function Steps() {
               <div className={`${step === 2 ? 'active': ''}`}>2</div>
               <div className={`${step === 3 ? 'active': ''}`}>3</div>
           </div>
-          <StepMessage step={step}>{messages[step - 1]}</StepMessage>
+          <p className="message">Step {step}: {messages[step - 1]}</p>
           <div className="buttons">
-              <Button handler={handlerPrev}>👈Prev</Button>
-              <Button handler={handlerNext}>Next 👉</Button>
+              <button
+                  style={buttonStyle}
+                  onClick={handlerPrev}
+              >
+                  Prev
+              </button>
+              <button
+                  style={buttonStyle}
+                  onClick={handlerNext}
+              >
+                  Next
+              </button>
             </div>
         </div>
         )}
         </>
   );
-}
-
-function StepMessage({ step, children }) {
-    return(<p className="message"><h3>Step {step}:</h3> {children}</p>)
-}
-
-function Button({ handler, children}) {
-    const buttonStyle = {
-        backgroundColor: '#7950f2',
-        color: '#fff'
-    }
-    return (
-        <button
-            style={buttonStyle}
-            onClick={handler}
-        >
-            {children}
-        </button>
-    )
 }
 
 export default App;
