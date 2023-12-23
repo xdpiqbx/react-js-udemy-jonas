@@ -4,6 +4,8 @@ format on save
 [ Ctrl + Shift + ` ] - Terminal
 
 Create React App
+`npm init react-app my-app`
+`npx create-react-app my-app`
 `npm create vite@latest`
 `npm i`
 
