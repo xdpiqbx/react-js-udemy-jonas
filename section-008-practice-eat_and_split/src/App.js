@@ -44,6 +44,17 @@ export default function App() {
     setShowAddFriend(false);
   }
 
+  function handleSplitBill(value) {
+    setFriends((friends) =>
+      friends.map((friend) =>
+        friend.id === selectedFriend.id
+          ? { ...friend, balance: friend.balance + value }
+          : friend
+      )
+    );
+    setSelectedFriend(null);
+  }
+
   return (
     <div className="app">
       <div className="sidebar">
@@ -57,7 +68,12 @@ export default function App() {
           {showAddFriend ? "Close" : "Add friend"}
         </Button>
       </div>
-      {selectedFriend && <FormSplitBill selectedFriend={selectedFriend} />}
+      {selectedFriend && (
+        <FormSplitBill
+          selectedFriend={selectedFriend}
+          onSplitBill={handleSplitBill}
+        />
+      )}
     </div>
   );
 }
@@ -148,13 +164,21 @@ function FormAddFriend({ onAddFriend }) {
   );
 }
 
-function FormSplitBill({ selectedFriend }) {
+function FormSplitBill({ selectedFriend, onSplitBill }) {
   const { name, balance } = selectedFriend;
   const [billValue, setBillValue] = useState(EMPTY_STRING);
-  const [payedByUser, setPayedByUser] = useState(EMPTY_STRING);
+  const [paidByUser, setPayedByUser] = useState(EMPTY_STRING);
   const [whoIsPaying, setWhoIsPaying] = useState("user");
+  const paidByFriend = billValue ? billValue - paidByUser : "";
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!billValue || !paidByUser) {
+      return;
+    }
+    onSplitBill(whoIsPaying === "user" ? paidByFriend : -paidByUser);
+  }
   return (
-    <form className="form-split-bill">
+    <form className="form-split-bill" onSubmit={handleSubmit}>
       <h2>Split a bill with {name}</h2>
       <label>💰 Bill value</label>
       <input
@@ -165,17 +189,17 @@ function FormSplitBill({ selectedFriend }) {
       <label>🧍‍♀️ Your expense</label>
       <input
         type="text"
-        value={payedByUser}
+        value={paidByUser}
         onChange={(event) =>
           setPayedByUser(
             Number(event.target.value) > billValue
-              ? payedByUser
+              ? paidByUser
               : Number(event.target.value)
           )
         }
       />
       <label>👫 {name}'s expense</label>
-      <input type="text" value={billValue - payedByUser} disabled />
+      <input type="text" value={billValue - paidByUser} disabled />
       <label>🤑 Who is paying the bill</label>
       <select
         value={whoIsPaying}
