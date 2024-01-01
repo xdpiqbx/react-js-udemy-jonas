@@ -8,28 +8,63 @@ const average = (arr) =>
 
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
   return (
     <>
-      <NavBar numberOfMovies={movies.length} />
-      <MainComponent movies={movies} />
+      <NavBar>
+        <Logo />
+        <SearchBar />
+        <NumResults numberOfMovies={movies.length} />
+      </NavBar>
+      <MainContent>
+        <Box>
+          <MovieList movies={movies} />
+        </Box>
+        <Box>
+          <WatchedSummary watched={watched} />
+          <WatchedMoviesList watched={watched} />
+        </Box>
+      </MainContent>
     </>
   );
 }
 
-function MainComponent({ movies }) {
+function NavBar({ children }) {
+  return <nav className="nav-bar">{children}</nav>;
+}
+
+function Logo() {
   return (
-    <main className="main">
-      <ListBox movies={movies} />
-      <WatchedBox />
-    </main>
+    <div className="logo">
+      <span role="img">🍿</span>
+      <h1>usePopcorn</h1>
+    </div>
   );
 }
-function ListBox({ movies }) {
+
+function SearchBar() {
+  const [query, setQuery] = useState("");
+  return (
+    <input
+      className="search"
+      type="text"
+      placeholder="Search movies..."
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+    />
+  );
+}
+
+function MainContent({ children }) {
+  return <main className="main">{children}</main>;
+}
+
+function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
   return (
     <div className="box">
       <ButtonShowHide isOpen={isOpen} onSetIsOpen={setIsOpen} />
-      {isOpen && <MovieList movies={movies} />}
+      {isOpen && children}
     </div>
   );
 }
@@ -64,22 +99,6 @@ function ButtonShowHide({ isOpen, onSetIsOpen }) {
     <button className="btn-toggle" onClick={() => onSetIsOpen((open) => !open)}>
       {isOpen ? "–" : "+"}
     </button>
-  );
-}
-
-function WatchedBox() {
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [isOpen, setIsOpen] = useState(true);
-  return (
-    <div className="box">
-      <ButtonShowHide isOpen={isOpen} onSetIsOpen={setIsOpen} />
-      {isOpen && (
-        <>
-          <WatchedSummary watched={watched} />
-          <WatchedMoviesList watched={watched} />
-        </>
-      )}
-    </div>
   );
 }
 
@@ -136,38 +155,6 @@ function WatchedMoviesList({ watched }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function NavBar({ numberOfMovies }) {
-  return (
-    <nav className="nav-bar">
-      <Logo />
-      <SearchBar />
-      <NumResults numberOfMovies={numberOfMovies} />
-    </nav>
-  );
-}
-
-function Logo() {
-  return (
-    <div className="logo">
-      <span role="img">🍿</span>
-      <h1>usePopcorn</h1>
-    </div>
-  );
-}
-
-function SearchBar() {
-  const [query, setQuery] = useState("");
-  return (
-    <input
-      className="search"
-      type="text"
-      placeholder="Search movies..."
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-    />
   );
 }
 
