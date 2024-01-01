@@ -2,11 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 // import "./index.css";
 // import App from "./App";
+import AppTextExpander from "./AppTextExpander/AppTextExpander";
 import StarRating from "./StarRating";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <StarRating maxRating={10} />
+    <AppTextExpander />
   </React.StrictMode>
 );
