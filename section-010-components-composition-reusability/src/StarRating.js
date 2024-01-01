@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-const starColor = "#e8b923";
-
 const containerStyle = {
   display: "flex",
   alignItems: "center",
@@ -12,24 +10,20 @@ const starContainerStar = {
   display: "flex",
 };
 
-const textStyle = {
-  lineHeight: "1",
-  margin: "0",
-};
-
-const starStyle = {
-  width: "48px",
-  height: "48px",
-  display: "block",
-  cursor: "pointer",
-};
-
-export default function StarRating({ maxRating = 5 }) {
-  const [rating, setRating] = useState(0);
+export default function StarRating({
+  maxRating = 5,
+  color = "#e8b923",
+  size = 48,
+  className = "",
+  defaultRating = 0,
+  onSetRating = () => {},
+}) {
+  const [rating, setRating] = useState(defaultRating);
   const [tempRating, setTempRating] = useState(0);
 
   function handleRating(i) {
     setRating(i + 1);
+    onSetRating(i + 1);
   }
   function handleTempRating(i) {
     setTempRating(i);
@@ -37,8 +31,14 @@ export default function StarRating({ maxRating = 5 }) {
   function handleIsFullStar(i) {
     return tempRating ? tempRating >= i + 1 : rating >= i + 1;
   }
+  const textStyle = {
+    lineHeight: "1",
+    margin: "0",
+    color,
+    fontSize: `${size / 1.5}px`,
+  };
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className={className}>
       <div style={starContainerStar}>
         {Array.from({ length: maxRating }, (_, i) => (
           <Star
@@ -46,6 +46,8 @@ export default function StarRating({ maxRating = 5 }) {
             onHoverIn={() => handleTempRating(i + 1)}
             onHoverOut={() => handleTempRating(0)}
             isFull={handleIsFullStar(i)}
+            size={size}
+            color={color}
             key={i}
           />
         ))}
@@ -55,7 +57,13 @@ export default function StarRating({ maxRating = 5 }) {
   );
 }
 
-function Star({ onRate, onHoverIn, onHoverOut, isFull }) {
+function Star({ onRate, onHoverIn, onHoverOut, isFull, color, size }) {
+  const starStyle = {
+    width: `${size}px`,
+    height: `${size}px`,
+    display: "block",
+    cursor: "pointer",
+  };
   return (
     <span
       role="button"
@@ -64,12 +72,16 @@ function Star({ onRate, onHoverIn, onHoverOut, isFull }) {
       onMouseEnter={onHoverIn}
       onMouseLeave={onHoverOut}
     >
-      {isFull ? <FullStar /> : <EmptyStar />}
+      {isFull ? (
+        <FullStar starColor={color} />
+      ) : (
+        <EmptyStar starColor={color} />
+      )}
     </span>
   );
 }
 
-function FullStar() {
+function FullStar({ starColor }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +94,7 @@ function FullStar() {
   );
 }
 
-function EmptyStar() {
+function EmptyStar({ starColor }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
