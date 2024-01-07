@@ -3,12 +3,16 @@ import { useState } from "react";
 import tempMovieData from "./data/tempMovieData.js";
 import tempWatchedData from "./data/tempWatchedData.js";
 
+import vars from "./config.js";
+
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
+
+  fetch(`http://www.omdbapi.com/?apikey=` + vars.OMDb_API_KEY + `&`);
   return (
     <>
       <NavBar>
