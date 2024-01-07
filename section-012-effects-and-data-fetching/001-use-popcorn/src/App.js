@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import tempMovieData from "./data/tempMovieData.js";
 import tempWatchedData from "./data/tempWatchedData.js";
@@ -12,7 +12,27 @@ export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
 
-  fetch(`http://www.omdbapi.com/?apikey=` + vars.OMDb_API_KEY + `&`);
+  //   useEffect(() => {
+  //     fetch(
+  //       `http://www.omdbapi.com/?apikey=` + vars.OMDb_API_KEY + `&s=interstellar`
+  //     )
+  //       .then((response) => response.json())
+  //       .then((data) => setMovies(data.Search));
+  //   }, []);
+
+  useEffect(() => {
+    async function fetchMovies() {
+      const fetchResult = await fetch(
+        `http://www.omdbapi.com/?apikey=` +
+          vars.OMDb_API_KEY +
+          `&s=interstellar`
+      );
+      const responseJson = await fetchResult.json();
+      setMovies(responseJson.Search);
+    }
+    fetchMovies();
+  }, []);
+
   return (
     <>
       <NavBar>
