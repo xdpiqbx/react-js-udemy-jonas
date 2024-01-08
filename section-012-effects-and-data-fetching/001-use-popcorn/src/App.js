@@ -11,6 +11,7 @@ const average = (arr) =>
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
+  const [isLoading, setIsLoading] = useState(false);
 
   //   useEffect(() => {
   //     fetch(
@@ -22,6 +23,7 @@ export default function App() {
 
   useEffect(() => {
     async function fetchMovies() {
+      setIsLoading(true);
       const fetchResult = await fetch(
         `http://www.omdbapi.com/?apikey=` +
           vars.OMDb_API_KEY +
@@ -29,6 +31,7 @@ export default function App() {
       );
       const responseJson = await fetchResult.json();
       setMovies(responseJson.Search);
+      setIsLoading(false);
     }
     fetchMovies();
   }, []);
@@ -41,7 +44,7 @@ export default function App() {
         <NumResults numberOfMovies={movies.length} />
       </NavBar>
       <MainContent>
-        <Box element={<MovieList movies={movies} />} />
+        <Box element={isLoading ? <Loader /> : <MovieList movies={movies} />} />
         <Box
           element={
             <>
@@ -60,6 +63,10 @@ export default function App() {
       </MainContent>
     </>
   );
+}
+
+function Loader() {
+  return <p className="loader">Loading...</p>;
 }
 
 function NavBar({ children }) {
