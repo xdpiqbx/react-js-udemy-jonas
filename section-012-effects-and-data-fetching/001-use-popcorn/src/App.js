@@ -14,14 +14,15 @@ export default function App() {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
 
-  //   useEffect(() => {
-  //     fetch(
-  //       `http://www.omdbapi.com/?apikey=` + vars.OMDb_API_KEY + `&s=interstellar`
-  //     )
-  //       .then((response) => response.json())
-  //       .then((data) => setMovies(data.Search));
-  //   }, []);
+  function handleSelectMovie(id) {
+    setSelectedId((selectedId) => (id === selectedId ? null : id));
+  }
+
+  function handleCloseMovie() {
+    setSelectedId(null);
+  }
 
   useEffect(() => {
     async function fetchMovies() {
@@ -62,27 +63,22 @@ export default function App() {
         <NumResults numberOfMovies={movies.length} />
       </NavBar>
       <MainContent>
-        {/* <Box element={isLoading ? <Loader /> : <MovieList movies={movies} />} /> */}
         <Box>
           {isLoading && <Loader />}
-          {!isLoading && !error && <MovieList movies={movies} />}
           {error && <ErrorMessage message={error} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} onSelectMovie={handleSelectMovie} />
+          )}
         </Box>
-
-        {/* <Box
-          element={
-            <>
-              <WatchedSummary watched={watched} />
-              <WatchedMoviesList watched={watched} />
-            </>
-          }
-        /> */}
-        {/* <Box>
-          <MovieList movies={movies} />
-        </Box> */}
         <Box>
-          <WatchedSummary watched={watched} />
-          <WatchedMoviesList watched={watched} />
+          {selectedId && (
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={handleCloseMovie}
+            />
+          )}
+          {!selectedId && <WatchedSummary watched={watched} />}
+          {!selectedId && <WatchedMoviesList watched={watched} />}
         </Box>
       </MainContent>
     </>
@@ -151,19 +147,19 @@ function Box({ children }) {
 //   );
 // }
 
-function MovieList({ movies }) {
+function MovieList({ movies, onSelectMovie }) {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie movie={movie} key={movie.imdbID} onSelectMovie={onSelectMovie} />
       ))}
     </ul>
   );
 }
 
-function Movie({ movie }) {
+function Movie({ movie, onSelectMovie }) {
   return (
-    <li>
+    <li onClick={() => onSelectMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -181,6 +177,17 @@ function ButtonShowHide({ isOpen, onSetIsOpen }) {
     <button className="btn-toggle" onClick={() => onSetIsOpen((open) => !open)}>
       {isOpen ? "–" : "+"}
     </button>
+  );
+}
+
+function MovieDetails({ selectedId, onCloseMovie }) {
+  return (
+    <div className="details">
+      <button className="btn-back" onClick={() => onCloseMovie()}>
+        &larr;
+      </button>
+      {selectedId}
+    </div>
   );
 }
 
