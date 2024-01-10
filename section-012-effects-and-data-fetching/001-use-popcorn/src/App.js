@@ -9,9 +9,11 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   //   useEffect(() => {
   //     fetch(
@@ -23,43 +25,65 @@ export default function App() {
 
   useEffect(() => {
     async function fetchMovies() {
-      setIsLoading(true);
-      const fetchResult = await fetch(
-        `http://www.omdbapi.com/?apikey=` +
-          vars.OMDb_API_KEY +
-          `&s=interstellar`
-      );
-      const responseJson = await fetchResult.json();
-      setMovies(responseJson.Search);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        setError("");
+        const fetchResult = await fetch(
+          `http://www.omdbapi.com/?apikey=` + vars.OMDb_API_KEY + `&s=${query}`
+        );
+        if (!fetchResult.ok) {
+          throw new Error("Something went wrong with fetching movies");
+        }
+        const responseJson = await fetchResult.json();
+        if (responseJson.Response === "False") {
+          throw new Error(responseJson.Error);
+        }
+        setMovies(responseJson.Search);
+      } catch (error) {
+        console.log(error.message);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (query.length < 3) {
+      setMovies([]);
+      setError("");
+      return;
     }
     fetchMovies();
-  }, []);
+  }, [query]);
 
   return (
     <>
       <NavBar>
         <Logo />
-        <SearchBar />
+        <SearchBar query={query} setQuery={setQuery} />
         <NumResults numberOfMovies={movies.length} />
       </NavBar>
       <MainContent>
-        <Box element={isLoading ? <Loader /> : <MovieList movies={movies} />} />
-        <Box
+        {/* <Box element={isLoading ? <Loader /> : <MovieList movies={movies} />} /> */}
+        <Box>
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
+        </Box>
+
+        {/* <Box
           element={
             <>
               <WatchedSummary watched={watched} />
               <WatchedMoviesList watched={watched} />
             </>
           }
-        />
+        /> */}
         {/* <Box>
           <MovieList movies={movies} />
-        </Box>
+        </Box> */}
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
-        </Box> */}
+        </Box>
       </MainContent>
     </>
   );
@@ -67,6 +91,15 @@ export default function App() {
 
 function Loader() {
   return <p className="loader">Loading...</p>;
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>🤦</span>
+      {message}
+    </p>
+  );
 }
 
 function NavBar({ children }) {
@@ -82,8 +115,7 @@ function Logo() {
   );
 }
 
-function SearchBar() {
-  const [query, setQuery] = useState("");
+function SearchBar({ query, setQuery }) {
   return (
     <input
       className="search"
@@ -99,25 +131,25 @@ function MainContent({ children }) {
   return <main className="main">{children}</main>;
 }
 
-// function Box({ children }) {
-//   const [isOpen, setIsOpen] = useState(true);
-//   return (
-//     <div className="box">
-//       <ButtonShowHide isOpen={isOpen} onSetIsOpen={setIsOpen} />
-//       {isOpen && children}
-//     </div>
-//   );
-// }
-
-function Box({ element }) {
+function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
   return (
     <div className="box">
       <ButtonShowHide isOpen={isOpen} onSetIsOpen={setIsOpen} />
-      {isOpen && element}
+      {isOpen && children}
     </div>
   );
 }
+
+// function Box({ element }) {
+//   const [isOpen, setIsOpen] = useState(true);
+//   return (
+//     <div className="box">
+//       <ButtonShowHide isOpen={isOpen} onSetIsOpen={setIsOpen} />
+//       {isOpen && element}
+//     </div>
+//   );
+// }
 
 function MovieList({ movies }) {
   return (
